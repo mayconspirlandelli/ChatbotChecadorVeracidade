@@ -1,1 +1,0 @@
-{"root":["./apps/web/vite.config.ts","./apps/web/src/app.tsx","./apps/web/src/main.tsx","./apps/web/src/components/theme-provider.tsx","./packages/ui/src/components/button.tsx","./packages/ui/src/lib/utils.ts"],"errors":true,"version":"5.9.3"}

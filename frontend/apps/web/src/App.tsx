@@ -1,5 +1,4 @@
 import { Button } from "@workspace/ui/components/button"
-import ChatBot from "react-chatbotify"
 
 export function App() {
   return (
@@ -13,11 +12,8 @@ export function App() {
         </div>
         <div className="text-muted-foreground font-mono text-xs">
           (Press <kbd>d</kbd> to toggle dark mode)
-
-          <ChatBot></ChatBot>
         </div>
       </div>
     </div>
-
   )
 }
