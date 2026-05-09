@@ -1,7 +1,25 @@
-# Byte-compiled / optimized / DLL files
+# Node.js
+node_modules/
+frontend/node_modules/
+frontend/apps/web/node_modules/
+frontend/packages/ui/node_modules/
+dist/
+.turbo/
+.vercel/
+.next/
+out/
+build/
+*.log
+
+frontend/node_modules
+frontend/.turbo
+
+# Python
 __pycache__/
-*.py[codz]
-*$py.class
+.venv/
+venv/
+*.py[cod]
+
 
 # C extensions
 *.so
