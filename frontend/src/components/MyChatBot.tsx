@@ -1,37 +1,16 @@
-import ChatBot, { type Flow } from "react-chatbotify";
+import ChatBot from "react-chatbotify";
 import "@/styles/chatbot.css";
-import LlmConnector, { GeminiProvider } from "@rcb-plugins/llm-connector";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
+import { useRef } from "react";
 
 const MyChatBot = () => {
-	// gemini api key, carregada do arquivo .env
-	const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+	// Usamos useRef para persistir os valores entre renderizações sem disparar re-renders desnecessários
+	const apiKeyRef = useRef(import.meta.env.VITE_GEMINI_API_KEY || null);
+	const modelType = useRef(import.meta.env.VITE_GEMINI_MODEL || "gemini-3.1-flash");
+	const hasErrorRef = useRef(false);
 
-	// initialize the plugin
-	const plugins = [LlmConnector()];
-
-	// example flow for testing
-	const flow = {
-		start: {
-			message: "Olá! Eu sou o *Argos*, seu assistente de checagem de informações.\n\nRecebo textos, áudios, vídeos ou links e digo se a informação é verdadeira, falsa ou não verificável — de forma rápida e sem complicação.\n\nMande o conteúdo que quiser verificar e eu cuido do resto. 🔍",
-			options: ["Estou pronto!"],
-			chatDisabled: true,
-			path: async (params) => {
-				if (!apiKey) {
-					await params.simulateStreamMessage("Você ainda não configurou sua chave de API Gemini!");
-					return "start";
-				}
-				await params.simulateStreamMessage("Pode perguntar qualquer coisa!");
-				return "gemini";
-			},
-		},
-		gemini: {
-			llmConnector: {
-				provider: new GeminiProvider({
-					mode: 'direct',
-					model: 'gemini-3.1-flash-preview',
-					responseFormat: 'stream',
-					apiKey: apiKey,
-					systemMessage: `Você é o Argos, um assistente especializado em checagem de fatos (fact-checking). 
+	const SYSTEM_MESSAGE = `Você é o Argos, um assistente especializado em checagem de fatos (fact-checking). 
 Sua missão é analisar as informações enviadas pelo usuário e determinar se são VERÍDICAS ou INVERÍDICAS, fornecendo uma breve explicação baseada em fatos.
 
 Abaixo estão alguns exemplos de como você deve responder:
@@ -48,11 +27,79 @@ Exemplo 3:
 Entrada: Vídeo mostra neve caindo em plena Avenida Paulista em São Paulo nesta tarde de verão!
 Saída: Esta notícia é INVERÍDICA. Não houve registro de neve em São Paulo recentemente, e as condições climáticas de verão tornam isso impossível. O vídeo provavelmente é manipulado ou de outro local/época.
 
-Sempre responda de forma direta, educada e baseada em evidências.`
-				}),
-				outputType: 'character',
-			},
+Sempre responda de forma direta, educada e baseada em evidências.`;
+
+	const gemini_stream = async (params) => {
+		try {
+			if (!apiKeyRef.current) {
+				throw new Error("API Key is missing");
+			}
+			const genAI = new GoogleGenerativeAI(apiKeyRef.current);
+			const model = genAI.getGenerativeModel({
+				model: modelType.current,
+				systemInstruction: SYSTEM_MESSAGE
+			});
+			const result = await model.generateContentStream(params.userInput);
+
+			let text = "";
+			let offset = 0;
+			for await (const chunk of result.stream) {
+				const chunkText = chunk.text();
+				text += chunkText;
+				for (let i = offset; i < chunkText.length; i++) {
+					await params.streamMessage(text.slice(0, i + 1));
+					await new Promise(resolve => setTimeout(resolve, 30));
+				}
+				offset += chunkText.length;
+			}
+
+			for (let i = offset; i < text.length; i++) {
+				await params.streamMessage(text.slice(0, i + 1));
+				await new Promise(resolve => setTimeout(resolve, 30));
+			}
+			await params.streamMessage(text);
+			await params.endStreamMessage();
+		} catch (error) {
+			console.error("Erro no Gemini Stream:", error);
+			await params.injectMessage(`Ops! Ocorreu um erro: ${error.message}. Verifique se sua chave de API é válida e se o modelo '${modelType.current}' está disponível.`);
+			hasErrorRef.current = true;
+		}
+	}
+
+	const flow = {
+		start: {
+			message: "Olá! Eu sou o *Argos*, seu assistente de checagem de informações.\n\nRecebo textos, áudios, vídeos ou links e digo se a informação é verdadeira, falsa ou não verificável — de forma rápida e sem complicação. 🔍",
+			path: () => {
+				if (apiKeyRef.current) {
+					return "loop";
+				}
+				return "api_key_prompt";
+			}
 		},
+		api_key_prompt: {
+			message: "Para começar, por favor insira sua chave de API do Gemini (ou configure-a no arquivo .env):",
+			path: "api_key_input",
+			isSensitive: true
+		},
+		api_key_input: {
+			message: (params) => {
+				apiKeyRef.current = params.userInput.trim();
+				return "Chave configurada! Como posso te ajudar hoje?";
+			},
+			path: "loop",
+		},
+		loop: {
+			message: async (params) => {
+				await gemini_stream(params);
+			},
+			path: () => {
+				if (hasErrorRef.current) {
+					hasErrorRef.current = false; // Reseta o erro para permitir nova tentativa
+					return "api_key_prompt";
+				}
+				return "loop";
+			}
+		}
 	};
 
 	const settings = {
@@ -63,15 +110,15 @@ Sempre responda de forma direta, educada e baseada em evidências.`
 			showFooter: false
 		},
 		chatHistory: {
-			storageKey: "example_gemini_integration"
+			storageKey: "argos_chat_history"
 		},
 		header: {
 			showAvatar: true,
 			avatar: "../assets/bot.svg",
 			title: "Argos"
 		},
-		notification: {
-			defaultToggledOn: false
+		botBubble: {
+			simulateStream: true
 		}
 	};
 
@@ -82,7 +129,6 @@ Sempre responda de forma direta, educada e baseada em evidências.`
 	return (
 		<ChatBot
 			settings={settings}
-			plugins={plugins}
 			flow={flow}
 			themes={themes}
 		/>
