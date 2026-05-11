@@ -29,7 +29,7 @@ Saída: Esta notícia é INVERÍDICA. Não houve registro de neve em São Paulo 
 
 Sempre responda de forma direta, educada e baseada em evidências.`;
 
-	const gemini_stream = async (params) => {
+	const gemini_stream = async (params: any) => {
 		try {
 			if (!apiKeyRef.current) {
 				throw new Error("API Key is missing");
@@ -59,9 +59,9 @@ Sempre responda de forma direta, educada e baseada em evidências.`;
 			}
 			await params.streamMessage(text);
 			await params.endStreamMessage();
-		} catch (error) {
+		} catch (error: any) {
 			console.error("Erro no Gemini Stream:", error);
-			await params.injectMessage(`Ops! Ocorreu um erro: ${error.message}. Verifique se sua chave de API é válida e se o modelo '${modelType.current}' está disponível.`);
+			await params.injectMessage(`Ops! Ocorreu um erro: ${error.message || error}. Verifique se sua chave de API é válida e se o modelo '${modelType.current}' está disponível.`);
 			hasErrorRef.current = true;
 		}
 	}
@@ -82,14 +82,14 @@ Sempre responda de forma direta, educada e baseada em evidências.`;
 			isSensitive: true
 		},
 		api_key_input: {
-			message: (params) => {
+			message: (params: any) => {
 				apiKeyRef.current = params.userInput.trim();
 				return "Chave configurada! Como posso te ajudar hoje?";
 			},
 			path: "loop",
 		},
 		loop: {
-			message: async (params) => {
+			message: async (params: any) => {
 				await gemini_stream(params);
 			},
 			path: () => {

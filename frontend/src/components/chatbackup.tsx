@@ -1,4 +1,4 @@
-import ChatBot, { type Flow } from "react-chatbotify";
+import ChatBot from "react-chatbotify";
 import "@/styles/chatbot.css";
 import LlmConnector, { GeminiProvider } from "@rcb-plugins/llm-connector";
 
@@ -10,12 +10,12 @@ const MyChatBot = () => {
     const plugins = [LlmConnector()];
 
     // example flow for testing
-    const flow = {
+    const flow: any = {
         start: {
             message: "Olá! Eu sou o *Argos*, seu assistente de checagem de informações.\n\nRecebo textos, áudios, vídeos ou links e digo se a informação é verdadeira, falsa ou não verificável — de forma rápida e sem complicação.\n\nMande o conteúdo que quiser verificar e eu cuido do resto. 🔍",
             options: ["Estou pronto!"],
             chatDisabled: true,
-            path: async (params) => {
+            path: async (params: any) => {
                 if (!apiKey) {
                     await params.simulateStreamMessage("Você ainda não configurou sua chave de API Gemini!");
                     return "start";
