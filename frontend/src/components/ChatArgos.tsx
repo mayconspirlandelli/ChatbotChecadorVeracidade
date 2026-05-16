@@ -112,6 +112,7 @@ https://daurora.com.br/checagem/${Math.floor(Math.random() * 100000)}
         },
         validate_experience: {
             message: "A resposta atendeu sua expectativa sobre a checagem? 😊",
+            options: ["Sim", "Não"],
             path: "new_request_check"
         },
         new_request_check: {
@@ -144,16 +145,17 @@ https://daurora.com.br/checagem/${Math.floor(Math.random() * 100000)}
         },
         social_invite: {
             message: "📲 Quer acompanhar mais conteúdos sobre combate à desinformação, educação midiática e checagem de fatos?\n\nSiga o projeto dAurora nas redes sociais:",
-            options: ["Instagram", "LinkedIn", "Continuar"],
+            options: ["Instagram", "LinkedIn", "Site"],
             path: (params: any) => {
                 const input = params.userInput;
                 if (input === "Instagram") {
                     window.open("https://www.instagram.com/daurora_ufg", "_blank");
-                    return "social_invite";
                 }
                 if (input === "LinkedIn") {
                     window.open("https://www.linkedin.com/in/d-aurora-0208a1354/", "_blank");
-                    return "social_invite";
+                }
+                if (input === "Site") {
+                    window.open("https://www.daurora.inf.ufg.br/", "_blank");
                 }
                 return "closing_message";
             }
