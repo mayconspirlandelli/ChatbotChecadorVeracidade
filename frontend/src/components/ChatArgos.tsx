@@ -69,24 +69,42 @@ https://daurora.com.br/checagem/${Math.floor(Math.random() * 100000)}
             path: "content_submission"
         },
         content_submission: {
+            transition: { duration: 0 },
             path: (params: any) => {
+                if (!params.userInput.trim()) {
+                    return "start";
+                }
                 checkData.current.content = params.userInput;
-                return "ask_context";
+                return "ask_origin";
             }
         },
-        ask_context: {
-            message: "Entendi. Para melhorar a precisão da análise, preciso de algumas informações adicionais:\n\n1. **Onde você recebeu essa informação?**\n(WhatsApp, Instagram, Tiktok, Redes Sociais, Portal de Notícias, etc.)\n\n2. **A mensagem cita alguma fonte, órgão oficial ou notícia?**\n\n3. **Você deseja verificar:**\n• o grau de veracidade/integridade/ilicitude da informação;\n• se o conteúdo foi retirado de contexto;\n• ou se há manipulação na imagem/vídeo?\n\nPode responder da forma que preferir 😊",
-            path: "process_context"
+        ask_origin: {
+            message: "Entendi! Para uma análise precisa, onde você recebeu essa informação? 📍",
+            options: ["WhatsApp", "Instagram", "TikTok", "Facebook", "Portal de Notícias", "Outro"],
+            path: (params: any) => {
+                checkData.current.context = `Origem: ${params.userInput}. `;
+                return "ask_source";
+            }
         },
-        process_context: {
-            transition: { duration: 0 },
-            path: async (params: any) => {
-                checkData.current.context = params.userInput;
+        ask_source: {
+            message: "A mensagem cita alguma fonte ou órgão oficial? (Ex: Ministério da Saúde, G1, etc.) 🏛️",
+            options: ["Sim", "Não", "Não sei informar"],
+            path: (params: any) => {
+                checkData.current.context += `Fonte citada: ${params.userInput}. `;
+                return "ask_goal";
+            }
+        },
+        ask_goal: {
+            message: "O que você deseja verificar especificamente? 🎯",
+            options: ["Veracidade (É verdade?)", "Contexto (Está fora de contexto?)", "Manipulação (Foi editado?)"],
+            path: (params: any) => {
+                checkData.current.context += `Objetivo: ${params.userInput}.`;
                 return "processing_message";
             }
         },
         processing_message: {
             message: "Perfeito 👍\n\nEstou analisando o conteúdo enviado e verificando fontes confiáveis.\n\nIsso pode levar alguns instantes.",
+            transition: { duration: 1000 },
             path: async (params: any) => {
                 await handleGeminiCheck(params);
                 return "validate_experience";
@@ -101,6 +119,7 @@ https://daurora.com.br/checagem/${Math.floor(Math.random() * 100000)}
             options: ["Sim", "Não"],
             path: (params: any) => {
                 if (params.userInput === "Sim") {
+                    checkData.current = { content: "", context: "", rating: "" };
                     return "start";
                 }
                 return "rating_prompt";
@@ -108,10 +127,11 @@ https://daurora.com.br/checagem/${Math.floor(Math.random() * 100000)}
         },
         rating_prompt: {
             message: "Tudo bem 😊\n\nAntes de encerrar, você poderia avaliar meu atendimento de 0 a 5?",
-            options: ["1", "2", "3", "4", "5"],
+            options: ["0", "1", "2", "3", "4", "5"],
             path: "rating_submission"
         },
         rating_submission: {
+            transition: { duration: 0 },
             path: (params: any) => {
                 checkData.current.rating = params.userInput;
                 return "final_thanks";
@@ -119,6 +139,7 @@ https://daurora.com.br/checagem/${Math.floor(Math.random() * 100000)}
         },
         final_thanks: {
             message: "Muito obrigado pela sua avaliação ⭐\n\nSua participação ajuda a melhorar continuamente o serviço de checagem e combate à desinformação.",
+            transition: { duration: 1000 },
             path: "social_invite"
         },
         social_invite: {
