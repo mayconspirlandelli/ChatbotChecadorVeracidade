@@ -103,8 +103,8 @@ https://daurora.com.br/checagem/${Math.floor(Math.random() * 100000)}
             }
         },
         processing_message: {
-            message: "Perfeito 👍\n\nEstou analisando o conteúdo enviado e verificando fontes confiáveis.\n\nIsso pode levar alguns instantes.",
-            transition: { duration: 1000 },
+            message: "Perfeito 👍\n\nEstou analisando o conteúdo enviado e verificando fontes confiáveis. Isso pode levar alguns instantes...",
+            transition: { duration: 1500 },
             path: async (params: any) => {
                 await handleGeminiCheck(params);
                 return "validate_experience";
@@ -112,16 +112,36 @@ https://daurora.com.br/checagem/${Math.floor(Math.random() * 100000)}
         },
         validate_experience: {
             message: "A resposta atendeu sua expectativa sobre a checagem? 😊",
-            options: ["Sim", "Não"],
-            path: "new_request_check"
+            options: ["Não", "Sim"],
+            path: (params: any) => {
+                if (params.userInput === "Sim") {
+                    return "new_request_check";
+                }
+                return "ask_clarification";
+            }
+        },
+        ask_clarification: {
+            message: "Lamento que a resposta não tenha sido suficiente. 😔 O que não ficou claro para você ou que informação adicional você gostaria de saber?",
+            path: (params: any) => {
+                checkData.current.context += `\nDúvida do usuário: ${params.userInput}`;
+                return "reprocessing_message";
+            }
+        },
+        reprocessing_message: {
+            message: "Entendi! Vou reanalisar o conteúdo com base na sua dúvida. Só um momento...",
+            transition: { duration: 1500 },
+            path: async (params: any) => {
+                await handleGeminiCheck(params);
+                return "validate_experience";
+            }
         },
         new_request_check: {
             message: "Fico feliz em ajudar 🙌\n\nVocê deseja verificar mais algum conteúdo?",
-            options: ["Sim", "Não"],
+            options: ["Não", "Sim"],
             path: (params: any) => {
                 if (params.userInput === "Sim") {
                     checkData.current = { content: "", context: "", rating: "" };
-                    return "start";
+                    return "processing_message";
                 }
                 return "rating_prompt";
             }
@@ -145,7 +165,7 @@ https://daurora.com.br/checagem/${Math.floor(Math.random() * 100000)}
         },
         social_invite: {
             message: "📲 Quer acompanhar mais conteúdos sobre combate à desinformação, educação midiática e checagem de fatos?\n\nSiga o projeto dAurora nas redes sociais:",
-            options: ["Instagram", "LinkedIn", "Site"],
+            options: ["Instagram", "LinkedIn", "Site", "Não, obrigado(a)"],
             path: (params: any) => {
                 const input = params.userInput;
                 if (input === "Instagram") {
@@ -156,6 +176,9 @@ https://daurora.com.br/checagem/${Math.floor(Math.random() * 100000)}
                 }
                 if (input === "Site") {
                     window.open("https://www.daurora.inf.ufg.br/", "_blank");
+                }
+                if (input === "Não, obrigado(a)") {
+                    return "closing_message";
                 }
                 return "closing_message";
             }
