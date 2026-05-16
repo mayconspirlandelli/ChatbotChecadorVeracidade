@@ -198,12 +198,14 @@ https://daurora.com.br/checagem/${Math.floor(Math.random() * 100000)}
             showFooter: false
         },
         header: {
-            title: "Argos - Checador dAurora",
+            title: "Checador dAurora",
             showAvatar: true,
-            avatar: "https://daurora.com.br/wp-content/uploads/2024/03/cropped-favicon-daurora-192x192.png"
         },
         botBubble: {
-            simulateStream: true
+            simulateStream: false
+        },
+        notification: {
+            disabled: true
         }
     };
 

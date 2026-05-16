@@ -26,7 +26,7 @@
 
 /* Header estilizado */
 .rcb-chat-header {
-  background: linear-gradient(135deg, var(--rcb-primary-teal), var(--rcb-secondary-teal)) !important;
+  /* background: linear-gradient(135deg, var(--rcb-primary-teal), var(--rcb-secondary-teal)) !important; */
   color: white !important;
   padding: 15px !important;
   border-bottom: 2px solid rgba(255, 255, 255, 0.1) !important;
@@ -37,13 +37,14 @@
   font-size: 1.1rem !important;
   letter-spacing: -0.02em !important;
   margin: 0 !important;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
 }
 
 /* Avatares 3D-like */
 .rcb-message-bot-avatar,
 .rcb-bot-avatar {
-  background: linear-gradient(135deg, var(--rcb-primary-teal), #2d8b84) !important;
+  background: white url("../assets/bot.svg") no-repeat center !important;
+  background-size: 70% !important;
   box-shadow: 0 4px 10px rgba(63, 184, 175, 0.3) !important;
   border: 2px solid white !important;
 }
@@ -107,7 +108,8 @@
   border-radius: 10px !important;
   margin-left: 8px !important;
   transition: transform 0.1s, background 0.3s !important;
-  box-shadow: 0 4px 0 #2d8b84 !important; /* Efeito de profundidade */
+  box-shadow: 0 4px 0 #2d8b84 !important;
+  /* Efeito de profundidade */
 }
 
 .rcb-send-button:hover {
