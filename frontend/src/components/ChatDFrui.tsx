@@ -3,7 +3,7 @@ import "@/styles/chatbot.css";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { useRef } from "react";
 
-const ChatArgos = () => {
+const ChatDFrui = () => {
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
     const modelName = import.meta.env.VITE_GEMINI_MODEL || "gemini-1.5-flash";
 
@@ -14,7 +14,7 @@ const ChatArgos = () => {
         rating: ""
     });
 
-    const SYSTEM_MESSAGE = `Você é o Argos, um assistente especializado em checagem de fatos (fact-checking) do projeto dAurora.
+    const SYSTEM_MESSAGE = `Você é o dFRui, um assistente especializado em checagem de fatos (fact-checking) do projeto dAurora.
 Sua missão é analisar informações e determinar sua veracidade de forma objetiva e confiável.
 
 Ao receber um conteúdo e seu contexto, você deve:
@@ -24,6 +24,21 @@ Ao receber um conteúdo e seu contexto, você deve:
 4. Gerar um link fictício no padrão https://daurora.com.br/checagem/[id] para a "análise completa".
 
 Responda sempre em Português do Brasil, mantendo um tom profissional e prestativo.`;
+
+    const formatMessageText = (text: string) => {
+        if (!text) return "";
+        const parts = text.split("**");
+        return (
+            <span style={{ whiteSpace: "pre-wrap" }}>
+                {parts.map((part, index) => {
+                    if (index % 2 !== 0) {
+                        return <strong key={index}>{part}</strong>;
+                    }
+                    return part;
+                })}
+            </span>
+        );
+    };
 
     const handleGeminiCheck = async (params: any) => {
         try {
@@ -39,24 +54,24 @@ Responda sempre em Português do Brasil, mantendo um tom profissional e prestati
             });
 
             const prompt = `
-CONTEÚDO PARA CHECAGEM:
-"${checkData.current.content}"
+                CONTEÚDO PARA CHECAGEM:
+                "${checkData.current.content}"
 
-CONTEXTO ADICIONAL:
-"${checkData.current.context}"
+                CONTEXTO ADICIONAL:
+                "${checkData.current.context}"
 
-Por favor, analise e formate a resposta conforme o padrão:
-✅ Resultado da Checagem
-[Sua análise aqui, destacando se há evidências oficiais e se há manipulação/descontextualização]
+                Por favor, analise e formate a resposta conforme o padrão:
+                **✅ Resultado da Checagem**
+                [Sua análise aqui, destacando se há evidências oficiais e se há manipulação/descontextualização]
 
-🔎 Confira a análise completa:
-https://daurora.com.br/checagem/${Math.floor(Math.random() * 100000)}
-`;
+                **🔎 Confira a análise completa:**
+                https://daurora.com.br/checagem/${Math.floor(Math.random() * 100000)}
+                `;
 
             const result = await model.generateContent(prompt);
             const responseText = result.response.text();
 
-            await params.injectMessage(responseText);
+            await params.injectMessage(formatMessageText(responseText));
         } catch (error: any) {
             console.error("Erro na checagem:", error);
             await params.injectMessage("Desculpe, tive um problema técnico ao analisar essa informação. Por favor, tente novamente em instantes.");
@@ -65,7 +80,7 @@ https://daurora.com.br/checagem/${Math.floor(Math.random() * 100000)}
 
     const flow = {
         start: {
-            message: "Olá! 👋\n\nEu sou o **Argos**, assistente inteligente de checagem de veracidade de informações.\n\nEstou aqui para ajudar você a verificar conteúdos suspeitos de forma simples, rápida e confiável.\n\n🔒 Este atendimento segue as diretrizes da LGPD (Lei Geral de Proteção de Dados). Seus dados serão utilizados apenas para fins de análise e melhoria do serviço, respeitando sua privacidade e segurança.\n\nPosso ajudar na checagem de:\n\n• Textos\n• Áudios\n• Vídeos\n• Imagens\n\nPor favor, envie o conteúdo que deseja verificar.",
+            message: "Olá! 👋\n\nEu sou o dFruit, assistente inteligente de checagem de desinformação e ilícitos digitais (golpes e fraudes). \n\nEstou aqui para ajudar você a verificar conteúdos suspeitos de forma simples, rápida e confiável.\n\n🔒 Este atendimento segue as diretrizes da LGPD (Lei Geral de Proteção de Dados). Seus dados serão utilizados apenas para fins de análise e melhoria do serviço.",
             path: "content_submission"
         },
         content_submission: {
@@ -96,7 +111,7 @@ https://daurora.com.br/checagem/${Math.floor(Math.random() * 100000)}
         },
         ask_goal: {
             message: "O que você deseja verificar especificamente? 🎯",
-            options: ["Veracidade (É verdade?)", "Contexto (Está fora de contexto?)", "Manipulação (Foi editado?)"],
+            options: ["Inverdade (falsidade)", "Descontextualizado (fora de contexto)", "Ilícito (ou ataque)", "Golpe (ou fraude)", "Outro"],
             path: (params: any) => {
                 checkData.current.context += `Objetivo: ${params.userInput}.`;
                 return "processing_message";
@@ -198,7 +213,7 @@ https://daurora.com.br/checagem/${Math.floor(Math.random() * 100000)}
             showFooter: false
         },
         header: {
-            title: "Checador dAurora",
+            title: "dFrui",
             showAvatar: true,
         },
         botBubble: {
@@ -206,6 +221,9 @@ https://daurora.com.br/checagem/${Math.floor(Math.random() * 100000)}
         },
         notification: {
             disabled: true
+        },
+        chatInput: {
+            enabledPlaceholderText: "Escreva aqui..."
         }
     };
 
@@ -222,4 +240,4 @@ https://daurora.com.br/checagem/${Math.floor(Math.random() * 100000)}
     );
 };
 
-export default ChatArgos;
+export default ChatDFrui;

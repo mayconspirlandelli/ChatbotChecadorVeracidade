@@ -1,5 +1,5 @@
 import './App.css'
-import ChatArgos from "@/components/ChatArgos";
+import ChatDFrui from "#components/ChatDFrui";
 
 function App() {
 
@@ -7,7 +7,7 @@ function App() {
     <>
       <div className="ticks"></div>
       <section id="spacer">
-        <ChatArgos />
+        <ChatDFrui />
       </section>
     </>
   )
