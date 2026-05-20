@@ -80,7 +80,7 @@ Responda sempre em Português do Brasil, mantendo um tom profissional e prestati
 
     const flow = {
         start: {
-            message: "Olá! 👋\n\nEu sou o dFruit, assistente inteligente de checagem de desinformação e ilícitos digitais (golpes e fraudes). \n\nEstou aqui para ajudar você a verificar conteúdos suspeitos de forma simples, rápida e confiável.\n\n🔒 Este atendimento segue as diretrizes da LGPD (Lei Geral de Proteção de Dados). Seus dados serão utilizados apenas para fins de análise e melhoria do serviço.",
+            message: "Olá! 👋\n\nSou o dFrui, seu assistente de checagem de desinformação, golpes e fraudes digitais.\n\nEstou aqui para ajudar você a verificar conteúdos suspeitos de forma simples, rápida e confiável.\n\n🔒 Este atendimento segue as diretrizes da LGPD (Lei Geral de Proteção de Dados). Seus dados serão utilizados apenas para fins de análise e melhoria do serviço.\n\nPosso ajudar na checagem de:\n\n• Textos\n• Áudios\n• Vídeos\n• Imagens\n\nEnvie o conteúdo que deseja verificar.",
             path: "content_submission"
         },
         content_submission: {
