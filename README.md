@@ -1,2 +1,2 @@
 # ChatbotChecadorVeracidade
-Chatbot para Checador de Veracidade de Informações como Fake News
+Assistente Inteligente de Checagem de Desinformação e Ilícitos Digitais, como golpes e fraudes.
