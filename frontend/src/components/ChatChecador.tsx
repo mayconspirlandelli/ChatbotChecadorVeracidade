@@ -3,7 +3,6 @@ import "@/styles/chatbot.css";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { useRef } from "react";
 
-
 const ChatDFrui = () => {
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
     const modelName = import.meta.env.VITE_GEMINI_MODEL || "gemini-1.5-flash";
@@ -80,45 +79,20 @@ Responda sempre em Português do Brasil, mantendo um tom profissional e prestati
     };
 
     const flow = {
-
         start: {
-            message: "Olá! 👋\n\nSou o dFrui, seu assistente de checagem de desinformação, golpes e fraudes digitais. " +
-                "\n\n🔒 Este atendimento segue as diretrizes da LGPD (Lei Geral de Proteção de Dados)." +
-                "\n\n Selecione o tipo de conteúdo que você deseja enviar para análise. O processo é totalmente anônimo.",
-            transition: { duration: 1000 },
+            message: "Olá! 👋\n\nSou o dFrui, seu assistente de checagem de desinformação, golpes e fraudes digitais.\n\nEstou aqui para ajudar você a verificar conteúdos suspeitos de forma simples, rápida e confiável.\n\n🔒 Este atendimento segue as diretrizes da LGPD (Lei Geral de Proteção de Dados). Seus dados serão utilizados apenas para fins de análise e melhoria do serviço.\n\nPosso ajudar na checagem de:\n\n• Textos\n• Áudios\n• Vídeos\n• Imagens\n\nEnvie o conteúdo que deseja verificar.",
             path: "content_submission"
         },
-
         content_submission: {
-            message: "O que você recebeu de conteúdo?",
-            chatDisabled: true,
-            options: ["SMS/Mensagem", "Áudio/Ligação", "Link/URL", "Imagens e Vídeos"],
+            transition: { duration: 0 },
             path: (params: any) => {
-                checkData.current.context = `Tipo de conteúdo: ${params.userInput}. `;
-                return "ask_content";
-            },
-        },
-
-        ask_content: {
-            message: (params: any) => {
-                const tipo = params.userInput;
-                if (tipo === "SMS/Mensagem") {
-                    return "✉️ Por favor, cole o texto da mensagem recebida abaixo:";
+                if (!params.userInput.trim()) {
+                    return "start";
                 }
-                if (tipo === "Áudio/Ligação") {
-                    return "🎤 Descreva o conteúdo do áudio ou ligação recebida:";
-                }
-                if (tipo === "Link/URL") {
-                    return "🔗 Cole o link/URL que deseja verificar:";
-                }
-                return "🖼️ Descreva o conteúdo das imagens ou vídeos recebidos:";
-            },
-            path: (params: any) => {
                 checkData.current.content = params.userInput;
                 return "ask_origin";
-            },
+            }
         },
-
         ask_origin: {
             message: "Entendi! Para uma análise precisa, onde você recebeu essa informação? 📍",
             options: ["WhatsApp", "Instagram", "TikTok", "Facebook", "Portal de Notícias", "Outro"],
@@ -140,16 +114,8 @@ Responda sempre em Português do Brasil, mantendo um tom profissional e prestati
             options: ["Inverdade (falsidade)", "Descontextualizado (fora de contexto)", "Ilícito (ou ataque)", "Golpe (ou fraude)", "Outro"],
             path: (params: any) => {
                 checkData.current.context += `Objetivo: ${params.userInput}.`;
-                return "ask_question";
-            }
-        },
-        ask_question: {
-            message: "Qual a sua pergunta em relação a esse conteúdo? Escreva sua dúvida ou alegação sobre o conteúdo.",
-            chatDisabled: true,
-            path: (params: any) => {
-                checkData.current.context += `Pergunta do usuário: ${params.userInput}. `;
                 return "processing_message";
-            },
+            }
         },
         processing_message: {
             message: "Perfeito 👍\n\nEstou analisando o conteúdo enviado e verificando fontes confiáveis. Isso pode levar alguns instantes...",
@@ -159,17 +125,15 @@ Responda sempre em Português do Brasil, mantendo um tom profissional e prestati
                 return "validate_experience";
             }
         },
-
         validate_experience: {
             message: "A resposta atendeu sua expectativa sobre a checagem? 😊",
             options: ["Não", "Sim"],
             path: (params: any) => {
                 if (params.userInput === "Sim") {
                     return "new_request_check";
-                } else {
-                    return "ask_clarification";
                 }
-            },
+                return "ask_clarification";
+            }
         },
         ask_clarification: {
             message: "Lamento que a resposta não tenha sido suficiente. 😔 O que não ficou claro para você ou que informação adicional você gostaria de saber?",
