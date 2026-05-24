@@ -4,15 +4,26 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { useRef } from "react";
 
 
+interface CheckData {
+    content: string;
+    context: string;
+    rating: string;
+}
+
+interface FlowParams {
+    userInput?: string;
+    injectMessage?: (msg: string) => Promise<void>;
+}
+
 const ChatDFrui = () => {
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
     const modelName = import.meta.env.VITE_GEMINI_MODEL || "gemini-1.5-flash";
 
     // Estado para armazenar dados da checagem atual
-    const checkData = useRef({
+    const checkData = useRef<CheckData>({
         content: "",
         context: "",
-        rating: ""
+        rating: "",
     });
 
     const SYSTEM_MESSAGE = `Você é o dFRui, um assistente especializado em checagem de fatos (fact-checking) do projeto dAurora.
@@ -82,11 +93,23 @@ Responda sempre em Português do Brasil, mantendo um tom profissional e prestati
     const flow = {
 
         start: {
-            message: "Olá! 👋\n\nSou o dFrui, seu assistente de checagem de desinformação, golpes e fraudes digitais. " +
-                "\n\n🔒 Este atendimento segue as diretrizes da LGPD (Lei Geral de Proteção de Dados)." +
-                "\n\n Selecione o tipo de conteúdo que você deseja enviar para análise. O processo é totalmente anônimo.",
-            transition: { duration: 1000 },
-            path: "content_submission"
+            message: "Olá! 👋\n\nEu sou o dFuri, assistente inteligente de apoio à checagem de conteúdos suspeitos e combate à desinformação.\n\n🔒 Este atendimento segue as diretrizes da LGPD. Sua privacidade é garantida com atendimento 100% anônimo. Você não precisa se identificar para enviar um relato.\n\nComo posso ajudar hoje?",
+            options: ["Reportar um novo conteúdo suspeito", "Acompanhar um relato já enviado"],
+            chatDisabled: true,
+            path: (params: any) => {
+                if (params.userInput === "Reportar um novo conteúdo suspeito") {
+                    return "content_submission";
+                }
+                return "code_submission";
+            },
+        },
+        code_submission: {
+            message: "Por favor, informe o código do relato para acompanhar o resultado da análise.",
+            chatDisabled: false,
+            path: (params: any) => {
+                checkData.current.context = `Código do relato: ${params.userInput}. `;
+                return "result_step";
+            },
         },
 
         content_submission: {
@@ -120,79 +143,127 @@ Responda sempre em Português do Brasil, mantendo um tom profissional e prestati
         },
 
         ask_origin: {
-            message: "Entendi! Para uma análise precisa, onde você recebeu essa informação? 📍",
-            options: ["WhatsApp", "Instagram", "TikTok", "Facebook", "Portal de Notícias", "Outro"],
-            path: (params: any) => {
-                checkData.current.context = `Origem: ${params.userInput}. `;
-                return "ask_source";
-            }
-        },
-        ask_source: {
-            message: "A mensagem cita alguma fonte ou órgão oficial? (Ex: Ministério da Saúde, G1, etc.) 🏛️",
-            options: ["Sim", "Não", "Não sei informar"],
-            path: (params: any) => {
-                checkData.current.context += `Fonte citada: ${params.userInput}. `;
-                return "ask_goal";
-            }
-        },
-        ask_goal: {
-            message: "O que você deseja verificar especificamente? 🎯",
-            options: ["Inverdade (falsidade)", "Descontextualizado (fora de contexto)", "Ilícito (ou ataque)", "Golpe (ou fraude)", "Outro"],
-            path: (params: any) => {
-                checkData.current.context += `Objetivo: ${params.userInput}.`;
-                return "ask_question";
-            }
-        },
-        ask_question: {
             message: "Qual a sua pergunta em relação a esse conteúdo? Escreva sua dúvida ou alegação sobre o conteúdo.",
-            chatDisabled: true,
             path: (params: any) => {
                 checkData.current.context += `Pergunta do usuário: ${params.userInput}. `;
+                return "ask_extra_info";
+            },
+        },
+        ask_extra_info: {
+            message: "Entendido.\n\nExiste alguma informação extra que possa ajudar na análise?\n\nPor exemplo:\n• Como você recebeu a mensagem;\n• Se houve pedido de senha ou Pix;\n• Se havia urgência ou ameaça;\n• Nome da instituição mencionada.",
+            path: (params: any) => {
+                if (params.userInput.trim()) {
+                    checkData.current.context += `Informação extra: ${params.userInput}. `;
+                }
+                return "ask_email";
+            },
+        },
+        ask_email: {
+            message: "Deseja receber o resultado da checagem por e‑mail?\nSeu e‑mail será usado apenas para envio da devolutiva e não será vinculado ao relato.",
+            chatDisabled: true,
+            options: ["Sim", "Não"],
+            path: (params: any) => {
+                if (params.userInput === "Sim") {
+                    // flag to collect email later
+                    checkData.current.context += "Solicita e‑mail: true. ";
+                    return "collect_email";
+                }
+                return "processing_message";
+            },
+        },
+        collect_email: {
+            message: "Por favor, informe o endereço de e‑mail onde deseja receber o resultado:",
+            path: (params: any) => {
+                checkData.current.context += `E‑mail: ${params.userInput}. `;
                 return "processing_message";
             },
         },
         processing_message: {
-            message: "Perfeito 👍\n\nEstou analisando o conteúdo enviado e verificando fontes confiáveis. Isso pode levar alguns instantes...",
+            message: "🔎 Estamos analisando o conteúdo enviado.\nIsso pode levar alguns instantes...",
+            chatDisabled: true,
             transition: { duration: 1500 },
             path: async (params: any) => {
                 await handleGeminiCheck(params);
-                return "validate_experience";
+                return "guidance_step";
+            },
+        },
+        result_step: { //Este trecho de codigo é fixo para simular o codigo enviado pelo usuario.
+            message: "✅ Resultado da Checagem\n\nClassificação: POSSÍVEL GOLPE / PHISHING\n\nO link enviado apresenta características comuns de fraude digital, incluindo:\n• senso de urgência;\n• ameaça de bloqueio de conta;\n• domínio suspeito;\n• solicitação indireta de dados bancários.\n\n⚠️ Código do Relato:\nDAU-2026-004581\n\n📄 Relatório completo:\nhttps://daurora.com.br/relatorio/DAU-2026-004581",
+            chatDisabled: true,
+            options: ["Ir para relatório completo", "Desejo verificar outro conteúdo?", "Desejo encerrar o chat?"],
+            path: (params: any) => {
+                const input = params.userInput;
+                if (input === "Ir para relatório completo") {
+                    window.open("https://daurora.com.br/relatorio/DAU-2026-004581", "_blank");
+                }
+                if (input === "Desejo verificar outro conteúdo?") {
+                    return "content_submission";
+                }
+                if (input === "Desejo encerrar o chat?") {
+                    return "closing_message";
+                }
+                return "result_step";
             }
         },
 
-        validate_experience: {
-            message: "A resposta atendeu sua expectativa sobre a checagem? 😊",
-            options: ["Não", "Sim"],
+        guidance_step: {
+            message: "🛡️ O que você deve fazer agora:\n• Não clique no link;\n• Bloqueie o número imediatamente;\n• Não forneça senhas ou códigos;\n• Caso já tenha enviado informações bancárias, entre em contato imediatamente com seu banco utilizando o número oficial presente no verso do cartão.",
+            transition: { duration: 1000 },
+            path: "resources_step",
+        },
+        resources_step: {
+            message: "📌 Caso precise de mais informações, aqui estão alguns recursos úteis que podem lhe ajudar:",
+            chatDisabled: true,
+            options: ["Registrar Boletim de Ocorrência", "Mecanismo Especial de Devolução(Pix)", "Cartilha de Segurança(CERT.br)", "Continuar"],
             path: (params: any) => {
-                if (params.userInput === "Sim") {
-                    return "new_request_check";
-                } else {
-                    return "ask_clarification";
+                const input = params.userInput;
+                if (input === "Registrar Boletim de Ocorrência") {
+                    window.open("https://raivirtual.ssp.go.gov.br/#/", "_blank");
                 }
-            },
-        },
-        ask_clarification: {
-            message: "Lamento que a resposta não tenha sido suficiente. 😔 O que não ficou claro para você ou que informação adicional você gostaria de saber?",
-            path: (params: any) => {
-                checkData.current.context += `\nDúvida do usuário: ${params.userInput}`;
-                return "reprocessing_message";
+                if (input === "Mecanismo Especial de Devolução(Pix)") {
+                    window.open("https://www.bcb.gov.br/meubc/faqs/p/o-que-e-e-como-funciona-o-mecanismo-especial-de-devolucao-med", "_blank");
+                }
+                if (input === "Cartilha de Segurança(CERT.br)") {
+                    window.open("https://cartilha.cert.br/", "_blank");
+                }
+                if (input === "Continuar") {
+                    return "new_request_check";
+                }
+                return "resources_step";
             }
         },
-        reprocessing_message: {
-            message: "Entendi! Vou reanalisar o conteúdo com base na sua dúvida. Só um momento...",
-            transition: { duration: 1500 },
-            path: async (params: any) => {
-                await handleGeminiCheck(params);
-                return "validate_experience";
-            }
-        },
+
+        // validate_experience: original validation after processing (not used)
+        //   message: "A resposta atendeu sua expectativa sobre a checagem? 😊",
+        //   options: ["Não", "Sim"],
+        //   path: (params: any) => {
+        //       if (params.userInput === "Sim") {
+        //           return "new_request_check";
+        //       } else {
+        //           return "ask_clarification";
+        //       }
+        //   },
+        // ask_clarification: removed
+        //   message: "Lamento que a resposta não tenha sido suficiente. 😔 O que não ficou claro para você ou que informação adicional você gostaria de saber?",
+        //   path: (params: any) => {
+        //       checkData.current.context += `\nDúvida do usuário: ${params.userInput}`;
+        //       return "reprocessing_message";
+        //   },
+        // reprocessing_message: removed
+        //   message: "Entendi! Vou reanalisar o conteúdo com base na sua dúvida. Só um momento...",
+        //   transition: { duration: 1500 },
+        //   path: async (params: any) => {
+        //       await handleGeminiCheck(params);
+        //       return "validate_experience";
+        //   },
+
         new_request_check: {
-            message: "Fico feliz em ajudar 🙌\n\nVocê deseja verificar mais algum conteúdo?",
-            options: ["Não", "Sim"],
+            message: "Você deseja verificar mais algum conteúdo?",
+            options: ["Sim", "Não"],
             path: (params: any) => {
                 if (params.userInput === "Sim") {
                     checkData.current = { content: "", context: "", rating: "" };
-                    return "processing_message";
+                    return "content_submission";
                 }
                 return "rating_prompt";
             }
@@ -244,8 +315,8 @@ Responda sempre em Português do Brasil, mantendo um tom profissional e prestati
     const settings = {
         general: {
             embedded: true,
-            primaryColor: "#3FB8AF",
-            secondaryColor: "#FF7C33",
+            primaryColor: "#30B8BF",
+            secondaryColor: "#FF6801",
             showFooter: false
         },
         header: {
@@ -263,6 +334,19 @@ Responda sempre em Português do Brasil, mantendo um tom profissional e prestati
         }
     };
 
+
+    // styles here
+    const styles = {
+        headerStyle: {
+            background: '#FF6801',
+            color: '#ffffff',
+            padding: '10px',
+        },
+        chatWindowStyle: {
+            backgroundColor: '#f2f2f2',
+        },
+    };
+
     const themes = [
         { id: "chatbot_daurora", version: "0.1.0" }
     ];
@@ -270,6 +354,7 @@ Responda sempre em Português do Brasil, mantendo um tom profissional e prestati
     return (
         <ChatBot
             settings={settings}
+            styles={styles}
             flow={flow}
             themes={themes}
         />

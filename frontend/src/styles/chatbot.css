@@ -1,12 +1,12 @@
 /* 
   Estilo personalizado para o Chatbot d'Aurora/dEnodare 
-  Inspirado no design 3D, cores Teal (#3FB8AF) e Orange (#FF7C33) do site.
+  Inspirado no design 3D, cores Teal (#30B8BF) e Orange (#FF6801) do site.
 */
 
 :root {
-  --rcb-primary-teal: #3fb8af;
+  --rcb-primary-teal: #30B8BF;
   --rcb-secondary-teal: #4ecdc4;
-  --rcb-accent-orange: #ff7c33;
+  --rcb-accent-orange: #FF6801;
   --rcb-bg-light: #f8fcfb;
   --rcb-bot-msg-bg: #e0f2f1;
   --rcb-user-msg-bg: #ff7c33;
@@ -24,11 +24,14 @@
   font-family: 'Inter', 'Segoe UI', Roboto, sans-serif !important;
 }
 
+
 /* Header estilizado */
 .rcb-chat-header {
   /* background: linear-gradient(135deg, var(--rcb-primary-teal), var(--rcb-secondary-teal)) !important; */
+  background-color: var(--rcb-primary-teal);
   color: white !important;
   padding: 15px !important;
+  width: 50%;
   border-bottom: 2px solid rgba(255, 255, 255, 0.1) !important;
 }
 

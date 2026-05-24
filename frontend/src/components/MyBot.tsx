@@ -31,7 +31,7 @@ const MyBot = () => {
         process_options: {
             transition: { duration: 0 },
             chatDisabled: true,
-            path: async (params) => {
+            path: async (params: any) => {
                 let link = "";
                 switch (params.userInput) {
                     case "Quickstart":
@@ -52,10 +52,10 @@ const MyBot = () => {
                     default:
                         return "unknown_input";
                 }
-                await params.injectMessage("Sit tight! I'll send you right there!");
-                setTimeout(() => {
-                    window.open(link);
-                }, 1000)
+                // await params.injectMessage("Sit tight! I'll send you right there!");
+                // setTimeout(() => {
+                //     window.open(link);
+                // }, 1000)
                 return "repeat"
             },
         },
