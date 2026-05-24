@@ -10,10 +10,7 @@ interface CheckData {
     rating: string;
 }
 
-interface FlowParams {
-    userInput?: string;
-    injectMessage?: (msg: string) => Promise<void>;
-}
+
 
 const ChatDFrui = () => {
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY;

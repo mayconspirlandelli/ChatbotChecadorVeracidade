@@ -1,16 +1,10 @@
 import './App.css'
-import ChatDFrui from "#components/ChatDFrui";
+import IframePage from "#components/IframePage";
 
 function App() {
-
   return (
-    <>
-      <div className="ticks"></div>
-      <section id="spacer">
-        <ChatDFrui />
-      </section>
-    </>
-  )
+    <IframePage />
+  );
 }
 
-export default App
+export default App;
