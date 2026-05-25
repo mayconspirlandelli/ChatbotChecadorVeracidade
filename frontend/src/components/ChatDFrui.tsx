@@ -55,8 +55,6 @@ Responda sempre em Português do Brasil, mantendo um tom profissional e prestati
         const fallback: RiskAnalysisData = {
             risk: ["RISCO ALTO", "risco medio", "risco baixo"].includes(text.toLowerCase()) ? text.toUpperCase() : "NÃO VERIFICÁVEL",
             score: 87,
-            category: ["Inverdade(falsidade)", "Descontextualização (fora de contexto)", "Ilícito (ou ataque)", "Golpe (ou fraude)"],
-            subcategory: ["Deepfake conteúdo manipulado", "Phishing bancário por SMS"],
             reason: text,   
         };
 
@@ -72,8 +70,6 @@ Responda sempre em Português do Brasil, mantendo um tom profissional e prestati
             return {
                 risk: typeof parsed.risk === "string" ? parsed.risk : fallback.risk,
                 score: Number.isFinite(Number(parsed.score)) ? Number(parsed.score) : fallback.score,
-                category: Array.isArray(parsed.category) ? parsed.category : fallback.category,
-                subcategory: Array.isArray(parsed.subcategory) ? parsed.subcategory : fallback.subcategory,
                 reason: typeof parsed.reason === "string" ? parsed.reason : fallback.reason,
             };
         } catch {
@@ -105,8 +101,6 @@ Responda sempre em Português do Brasil, mantendo um tom profissional e prestati
                 {
                   "risk": "RISCO ALTO", "RISCO MÉDIO" ou "RISCO BAIXO",
                   "score": 87,
-                  "category": ["Inverdade(falsidade)", "Descontextualização (fora de contexto)", "Ilícito (ou ataque)", "Golpe (ou fraude)"],
-                  "subcategory": ["Deepfake conteúdo manipulado", "Phishing bancário por SMS"],
                   "reason": "Explique em uma ou duas frases por que o conteúdo foi classificado assim."
                 }
                 `;
@@ -253,8 +247,6 @@ Responda sempre em Português do Brasil, mantendo um tom profissional e prestati
                         <RiskAnalysisCard
                             risk={currentAnalysis.risk}
                             score={currentAnalysis.score}
-                            category={currentAnalysis.category}
-                            subcategory={currentAnalysis.subcategory}
                             reason={currentAnalysis.reason}
                         />
                     ) : null;
