@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import ChatDFrui from "#components/ChatDFrui";
 import paginaImg from "../assets/pagina_denodare.png";
-import icone_chat from "../assets/icone_chatbot.svg";
+import icone_chat from "../assets/icon_page_robot.png";
 
 const IframePage: React.FC = () => {
   const [showChat, setShowChat] = useState(false);

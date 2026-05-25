@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import ChatDFrui from "#components/ChatDFrui";
 import relatorioImg from "../assets/pagina_denodare_relatorio.png";
-import icone_chat from "../assets/icone_chatbot.svg";
+import icone_chat from "../assets/icon_page_robot.png";
 
 const RelatorioPage: React.FC = () => {
     const [showChat, setShowChat] = useState(false);

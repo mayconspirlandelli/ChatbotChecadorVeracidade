@@ -46,8 +46,9 @@
 /* Avatares 3D-like */
 .rcb-message-bot-avatar,
 .rcb-bot-avatar {
-  background: white url("../assets/bot.svg") no-repeat center !important;
-  background-size: 70% !important;
+  /*background: white url("../assets/bot.svg") no-repeat center !important;*/
+  background: white url("../assets/icon_title_robot.png") no-repeat center !important;
+  background-size: 130% !important;
   box-shadow: 0 4px 10px rgba(63, 184, 175, 0.3) !important;
   border: 2px solid white !important;
 }

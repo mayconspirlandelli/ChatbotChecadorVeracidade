@@ -1,208 +1,315 @@
 
+import React from "react";
+import {
+  AlertTriangle,
+  ExternalLink,
+  ShieldAlert,
+  Bot,
+  UserSearch,
+} from "lucide-react";
+
 export interface RiskAnalysisCardProps {
-  risk: string;
-  score: number;
-  category: string[];
-  subcategory: string[];
-  reason: string;
+  risk?: string;
+  score?: number;
+  syntheticTitle?: string;
+  syntheticDescription?: string;
+  fraudTitle?: string;
+  fraudDescription?: string;
+  reason?: string;
+  analysisUrl?: string;
 }
-const defaultRiskAnalysisCardProps: RiskAnalysisCardProps = {
+
+const defaultProps: Required<RiskAnalysisCardProps> = {
   risk: "RISCO ALTO",
   score: 87,
-  category: ["GERAÇÃO SINTÉTICA", "GOLPE/FRAUDE"],
-  subcategory: ["Deepfake conteúdo manipulado", "Phishing bancário por SMS"],
-  reason: "Identificamos o uso de link encurtado apontando para domínio suspeito, além de linguagem de urgência típica de golpes de phishing bancário.",
+  syntheticTitle: "GERAÇÃO SINTÉTICA",
+  syntheticDescription: "Deepfake conteúdo manipulado",
+  fraudTitle: "GOLPE/FRAUDE",
+  fraudDescription: "Phishing bancário por SMS",
+  reason:
+    "Identificamos o uso de link encurtado apontando para domínio suspeito, além de linguagem de urgência típica de golpes de phishing bancário.",
+  analysisUrl: "#",
 };
-const RiskAnalysisCard = ({
-  risk = defaultRiskAnalysisCardProps.risk,
-  score = defaultRiskAnalysisCardProps.score,
-  category = defaultRiskAnalysisCardProps.category,
-  subcategory = defaultRiskAnalysisCardProps.subcategory,
-  reason = defaultRiskAnalysisCardProps.reason,
-}: Partial<RiskAnalysisCardProps>) => {
+
+const RiskAnalysisCard: React.FC<Partial<RiskAnalysisCardProps>> = ({
+  risk = defaultProps.risk,
+  score = defaultProps.score,
+  syntheticTitle = defaultProps.syntheticTitle,
+  syntheticDescription = defaultProps.syntheticDescription,
+  fraudTitle = defaultProps.fraudTitle,
+  fraudDescription = defaultProps.fraudDescription,
+  reason = defaultProps.reason,
+  analysisUrl = defaultProps.analysisUrl,
+}) => {
   return (
     <div
       style={{
-        border: "4px solid #ef4444",
-        borderRadius: "20px",
-        padding: "18px",
-        background: "#f8f8f8",
         width: "100%",
-        maxWidth: "760px",
-        margin: "20px auto",
+        maxWidth: "520px",
+        margin: "0 auto",
+        background: "#f4f4f4",
+        borderRadius: "28px",
+        border: "3px solid #ef4444",
+        padding: "20px",
         fontFamily: "Arial, sans-serif",
+        boxSizing: "border-box",
       }}
     >
       {/* Header */}
       <div
         style={{
           display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
-          flexWrap: "wrap",
+          alignItems: "center",
           gap: "12px",
         }}
       >
-        {/* Risk */}
-        <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
+        <div
+          style={{
+            minWidth: "64px",
+            width: "64px",
+            height: "64px",
+            borderRadius: "50%",
+            background: "#ebebeb",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <AlertTriangle size={36} color="#ef4444" />
+        </div>
+        <div>
           <div
             style={{
-              width: "48px",
-              height: "48px",
-              borderRadius: "50%",
-              background: "#fff",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "24px",
-              color: "#ef4444",
+              color: "#6b7280",
+              fontSize: "14px",
+              fontWeight: 700,
             }}
           >
-            ⚠️
+            Classificação de Risco
           </div>
-          <div>
-            <p
-              style={{
-                margin: 0,
-                color: "#6b7280",
-                fontSize: "14px",
-                fontWeight: 300,
-              }}
-            >
-              Classificação de Risco
-            </p>
-            <h1
-              style={{
-                margin: 0,
-                color: "#ef4444",
-                fontSize: "32px",
-                fontWeight: 600,
-              }}
-            >
-              {risk}
-            </h1>
+          <div
+            style={{
+              color: "#ff1d1d",
+              fontSize: "28px",
+              fontWeight: 900,
+              lineHeight: 1,
+              marginTop: "4px",
+            }}
+          >
+            {risk}
           </div>
-        </div>
-        {/* Tags */}
-        <div
-          style={{
-            display: "flex",
-            gap: "12px",
-            flexWrap: "wrap",
-          }}
-        >
-          {category.map((item, index) => (
-            <div key={index}>
-              <div
-                style={{
-                  background:
-                    index === 0 ? "#f59e0b" : "#ef4444",
-                  color: "#fff",
-                  padding: "8px 12px",
-                  borderRadius: "8px",
-                  fontWeight: "bold",
-                  textAlign: "center",
-                  fontSize: "12px",
-                }}
-              >
-                {item}
-              </div>
-              <div
-                style={{
-                  marginTop: "6px",
-                  border: `2px solid ${
-                    index === 0 ? "#f59e0b" : "#ef4444"
-                  }`,
-                  color:
-                    index === 0 ? "#b45309" : "#b91c1c",
-                  borderRadius: "10px",
-                  padding: "5px 8px",
-                  fontSize: "10px",
-                  background: "#fff",
-                  textAlign: "center",
-                }}
-              >
-                {subcategory[index]}
-              </div>
-            </div>
-          ))}
         </div>
       </div>
+
       {/* Risk Bar */}
-      <div style={{ marginTop: "50px" }}>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            marginBottom: "12px",
-            color: "#6b7280",
-            fontWeight: 400,
-            fontSize: "14px",
-          }}
-        >
-          <span>Baixo</span>
-          <span>Médio</span>
-          <span style={{ color: "#ef4444" }}>Alto</span>
-          <span>Crítico</span>
-        </div>
+      <div style={{ marginTop: "20px" }}>
         <div
           style={{
             width: "100%",
-            height: "16px",
+            height: "18px",
             borderRadius: "999px",
+            background: "#d1d5db",
             overflow: "hidden",
-            display: "flex",
-            background: "#e5e7eb",
+            position: "relative",
           }}
         >
-          <div style={{ width: "35%", background: "#22c55e" }} />
-          <div style={{ width: "25%", background: "#f59e0b" }} />
-          <div style={{ width: "25%", background: "#ef4444" }} />
-          <div style={{ width: "15%", background: "#d1d5db" }} />
+          <div
+            style={{
+              width: `${Math.max(0, Math.min(100, score))}%`,
+              height: "100%",
+              borderRadius: "999px",
+              background:
+                "linear-gradient(90deg, #22c55e 0%, #f59e0b 50%, #ff0000 100%)",
+            }}
+          />
         </div>
         <div
           style={{
-            textAlign: "right",
+            textAlign: "center",
             marginTop: "10px",
-            fontSize: "18px",
-            fontWeight: 500,
-            color: "#374151",
+            color: "#6b7280",
+            fontSize: "14px",
+            fontWeight: 700,
           }}
         >
           Score: {score}/100
         </div>
       </div>
-      {/* Explanation */}
-      <div
-        style={{
-          marginTop: "40px",
-          background: "#fee2e2",
-          borderRadius: "20px",
-          padding: "28px",
-          border: "2px solid #fecaca",
-        }}
-      >
-        <h2
+
+      {/* Synthetic */}
+      <div style={{ marginTop: "18px" }}>
+        <div
           style={{
-            color: "#dc2626",
-            marginTop: 0,
-            fontSize: "20px",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
           }}
         >
-          ⓘ Por que este risco é alto?
-        </h2>
+          <Bot size={28} color="#f4a621" />
+          <div
+            style={{
+              flex: 1,
+              background: "#f4a621",
+              color: "#fff",
+              fontWeight: 800,
+              fontSize: "14px",
+              borderRadius: "6px",
+              textAlign: "center",
+              padding: "8px",
+            }}
+          >
+            {syntheticTitle}
+          </div>
+        </div>
+        <div
+          style={{
+            marginTop: "8px",
+            border: "2px solid #f4a621",
+            borderRadius: "6px",
+            padding: "8px",
+            textAlign: "center",
+            color: "#c97d00",
+            background: "#fff",
+            fontSize: "13px",
+          }}
+        >
+          {syntheticDescription}
+        </div>
+      </div>
+
+      {/* Fraud */}
+      <div style={{ marginTop: "14px" }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+          }}
+        >
+          <ShieldAlert size={28} color="#ff1d1d" />
+          <div
+            style={{
+              flex: 1,
+              background: "#ff1d1d",
+              color: "#fff",
+              fontWeight: 800,
+              fontSize: "14px",
+              borderRadius: "6px",
+              textAlign: "center",
+              padding: "8px",
+            }}
+          >
+            {fraudTitle}
+          </div>
+        </div>
+        <div
+          style={{
+            marginTop: "8px",
+            border: "2px solid #ff1d1d",
+            borderRadius: "6px",
+            padding: "8px",
+            textAlign: "center",
+            color: "#d61c1c",
+            background: "#fff",
+            fontSize: "13px",
+          }}
+        >
+          {fraudDescription}
+        </div>
+      </div>
+
+      {/* Human Analysis */}
+      <div
+        style={{
+          marginTop: "16px",
+          background: "#d9d9d9",
+          borderRadius: "12px",
+          padding: "12px",
+          display: "flex",
+          alignItems: "center",
+          gap: "10px",
+          color: "#6b7280",
+        }}
+      >
+        <UserSearch size={28} />
+        <div
+          style={{
+            fontSize: "12px",
+            lineHeight: 1.3,
+            textAlign: "left",
+          }}
+        >
+          Checadores humanos
+          <br />
+          avaliando...
+        </div>
+      </div>
+
+      {/* Reason */}
+      <div
+        style={{
+          marginTop: "18px",
+          background: "#f8d7da",
+          borderRadius: "12px",
+          padding: "12px",
+          textAlign: "center",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: "8px",
+            color: "#d61c1c",
+            fontWeight: 800,
+            fontSize: "14px",
+          }}
+        >
+          <AlertTriangle size={20} />
+          <span>Por que este risco é alto?</span>
+        </div>
         <p
           style={{
-            color: "#b91c1c",
+            marginTop: "10px",
+            color: "#c81e1e",
             fontSize: "14px",
-            lineHeight: 1.6,
+            lineHeight: 1.4,
+            textAlign: "justify",
             marginBottom: 0,
           }}
         >
           {reason}
         </p>
       </div>
+
+      {/* CTA */}
+      <a
+        href={analysisUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{
+          marginTop: "16px",
+          width: "100%",
+          background: "#2cbec4",
+          borderRadius: "12px",
+          padding: "12px",
+          color: "#fff",
+          fontWeight: 800,
+          fontSize: "14px",
+          textDecoration: "none",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "8px",
+          boxSizing: "border-box",
+        }}
+      >
+        <ExternalLink size={18} />
+        VER ANÁLISE COMPLETA
+      </a>
     </div>
   );
 };
+
 export default RiskAnalysisCard;
