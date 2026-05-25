@@ -187,16 +187,16 @@ Responda sempre em Português do Brasil, mantendo um tom profissional e prestati
         result_step: { //Este trecho de codigo é fixo para simular o codigo enviado pelo usuario.
             message: "✅ Resultado da Checagem\n\nClassificação: POSSÍVEL GOLPE / PHISHING\n\nO link enviado apresenta características comuns de fraude digital, incluindo:\n• senso de urgência;\n• ameaça de bloqueio de conta;\n• domínio suspeito;\n• solicitação indireta de dados bancários.\n\n⚠️ Código do Relato:\nDAU-2026-004581\n\n📄 Relatório completo:\nhttps://daurora.com.br/relatorio/DAU-2026-004581",
             chatDisabled: true,
-            options: ["Ir para relatório completo", "Desejo verificar outro conteúdo?", "Desejo encerrar o chat?"],
+            options: ["Ir para relatório completo", "Desejo verificar outro conteúdo", "Desejo encerrar o chat"],
             path: (params: any) => {
                 const input = params.userInput;
                 if (input === "Ir para relatório completo") {
-                    window.open("https://daurora.com.br/relatorio/DAU-2026-004581", "_blank");
+                    window.open("localhost:5173/relatorio", "_blank");
                 }
-                if (input === "Desejo verificar outro conteúdo?") {
+                if (input === "Desejo verificar outro conteúdo") {
                     return "content_submission";
                 }
-                if (input === "Desejo encerrar o chat?") {
+                if (input === "Desejo encerrar o chat") {
                     return "closing_message";
                 }
                 return "result_step";
@@ -299,7 +299,7 @@ Responda sempre em Português do Brasil, mantendo um tom profissional e prestati
                 if (input === "Não, obrigado(a)") {
                     return "closing_message";
                 }
-                return "closing_message";
+                return "social_invite";
             }
         },
         closing_message: {
