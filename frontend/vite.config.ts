@@ -14,7 +14,7 @@ export default defineConfig({
     tailwindcss(),
   ],
   preview: {
-    allowedHosts: ["frontend-chatbot-production-f8f6.up.railway.app"],
+    allowedHosts: ["chatbot-daurora-f8f6.up.railway.app"],
   },
   resolve: {
     alias: {

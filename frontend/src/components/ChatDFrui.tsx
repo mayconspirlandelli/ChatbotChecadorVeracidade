@@ -2,6 +2,7 @@ import ChatBot from "react-chatbotify";
 import "@/styles/chatbot.css";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { useRef } from "react";
+import RiskAnalysisCard, { type RiskAnalysisCardProps } from "./RiskAnalysisCard";
 
 
 interface CheckData {
@@ -10,11 +11,12 @@ interface CheckData {
     rating: string;
 }
 
-
+type RiskAnalysisData = RiskAnalysisCardProps;
 
 const ChatDFrui = () => {
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
     const modelName = import.meta.env.VITE_GEMINI_MODEL || "gemini-1.5-flash";
+    const analysisResultRef = useRef<RiskAnalysisData | null>(null);
 
     // Estado para armazenar dados da checagem atual
     const checkData = useRef<CheckData>({
@@ -49,6 +51,36 @@ Responda sempre em Português do Brasil, mantendo um tom profissional e prestati
         );
     };
 
+    const parseAnalysisResult = (text: string): RiskAnalysisData => {
+        const fallback: RiskAnalysisData = {
+            risk: ["RISCO ALTO", "risco medio", "risco baixo"].includes(text.toLowerCase()) ? text.toUpperCase() : "NÃO VERIFICÁVEL",
+            score: 87,
+            category: ["Inverdade(falsidade)", "Descontextualização (fora de contexto)", "Ilícito (ou ataque)", "Golpe (ou fraude)"],
+            subcategory: ["Deepfake conteúdo manipulado", "Phishing bancário por SMS"],
+            reason: text,   
+        };
+
+        const cleanedText = text
+            .replace(/^```json\s*/i, "")
+            .replace(/^```\s*/i, "")
+            .replace(/\s*```$/i, "")
+            .trim();
+
+        try {
+            const parsed = JSON.parse(cleanedText);
+
+            return {
+                risk: typeof parsed.risk === "string" ? parsed.risk : fallback.risk,
+                score: Number.isFinite(Number(parsed.score)) ? Number(parsed.score) : fallback.score,
+                category: Array.isArray(parsed.category) ? parsed.category : fallback.category,
+                subcategory: Array.isArray(parsed.subcategory) ? parsed.subcategory : fallback.subcategory,
+                reason: typeof parsed.reason === "string" ? parsed.reason : fallback.reason,
+            };
+        } catch {
+            return fallback;
+        }
+    };
+
     const handleGeminiCheck = async (params: any) => {
         try {
             if (!apiKey) {
@@ -69,18 +101,26 @@ Responda sempre em Português do Brasil, mantendo um tom profissional e prestati
                 CONTEXTO ADICIONAL:
                 "${checkData.current.context}"
 
-                Por favor, analise e formate a resposta conforme o padrão:
-                **✅ Resultado da Checagem**
-                [Sua análise aqui, destacando se há evidências oficiais e se há manipulação/descontextualização]
-
-                **🔎 Confira a análise completa:**
-                https://daurora.com.br/checagem/${Math.floor(Math.random() * 100000)}
+                Responda estritamente em JSON válido, sem markdown e sem texto fora do objeto, usando este formato:
+                {
+                  "risk": "RISCO ALTO", "RISCO MÉDIO" ou "RISCO BAIXO",
+                  "score": 87,
+                  "category": ["Inverdade(falsidade)", "Descontextualização (fora de contexto)", "Ilícito (ou ataque)", "Golpe (ou fraude)"],
+                  "subcategory": ["Deepfake conteúdo manipulado", "Phishing bancário por SMS"],
+                  "reason": "Explique em uma ou duas frases por que o conteúdo foi classificado assim."
+                }
                 `;
 
             const result = await model.generateContent(prompt);
             const responseText = result.response.text();
+            const parsedAnalysis = parseAnalysisResult(responseText);
 
-            await params.injectMessage(formatMessageText(responseText));
+            analysisResultRef.current = parsedAnalysis;
+
+            await params.injectMessage(
+                //formatMessageText(responseText)
+                formatMessageText("Análise concluída.")
+            );
         } catch (error: any) {
             console.error("Erro na checagem:", error);
             await params.injectMessage("Desculpe, tive um problema técnico ao analisar essa informação. Por favor, tente novamente em instantes.");
@@ -181,7 +221,7 @@ Responda sempre em Português do Brasil, mantendo um tom profissional e prestati
             transition: { duration: 1500 },
             path: async (params: any) => {
                 await handleGeminiCheck(params);
-                return "guidance_step";
+                return "result_analysis_ia";
             },
         },
         result_step: { //Este trecho de codigo é fixo para simular o codigo enviado pelo usuario.
@@ -191,7 +231,7 @@ Responda sempre em Português do Brasil, mantendo um tom profissional e prestati
             path: (params: any) => {
                 const input = params.userInput;
                 if (input === "Ir para relatório completo") {
-                    window.open("localhost:5173/relatorio", "_blank");
+                    window.open("/relatorio", "_blank");
                 }
                 if (input === "Desejo verificar outro conteúdo") {
                     return "content_submission";
@@ -201,6 +241,36 @@ Responda sempre em Português do Brasil, mantendo um tom profissional e prestati
                 }
                 return "result_step";
             }
+        },
+
+        result_analysis_ia: {
+                message: "Veja o resumo da análise abaixo.",
+                chatDisabled: true,
+                component: () => {
+                    const currentAnalysis = analysisResultRef.current;
+
+                    return currentAnalysis ? (
+                        <RiskAnalysisCard
+                            risk={currentAnalysis.risk}
+                            score={currentAnalysis.score}
+                            category={currentAnalysis.category}
+                            subcategory={currentAnalysis.subcategory}
+                            reason={currentAnalysis.reason}
+                        />
+                    ) : null;
+                },
+                options: ["Ver análise completa", "Continuar"],
+                path: (params: any) => {
+                    const input = params.userInput;
+                    if (input === "Ver análise completa") {
+                         window.open("/relatorio", "_blank");
+                    }
+                    if (input === "Continuar") {
+                        return "guidance_step";
+                    }
+                    return "result_analysis_ia";
+                }
+                
         },
 
         guidance_step: {
@@ -260,6 +330,7 @@ Responda sempre em Português do Brasil, mantendo um tom profissional e prestati
             path: (params: any) => {
                 if (params.userInput === "Sim") {
                     checkData.current = { content: "", context: "", rating: "" };
+                    analysisResultRef.current = null;
                     return "content_submission";
                 }
                 return "rating_prompt";
