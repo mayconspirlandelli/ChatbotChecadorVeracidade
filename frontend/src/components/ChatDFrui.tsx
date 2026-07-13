@@ -3,6 +3,7 @@ import "@/styles/chatbot.css";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { useRef } from "react";
 import RiskAnalysisCard, { type RiskAnalysisCardProps } from "./RiskAnalysisCard";
+import { fetchReportById, summarizeReport } from "./endpoints";
 
 
 interface CheckData {
@@ -137,8 +138,24 @@ Responda sempre em Português do Brasil, mantendo um tom profissional e prestati
         code_submission: {
             message: "Por favor, informe o código do relato para acompanhar o resultado da análise.",
             chatDisabled: false,
-            path: (params: any) => {
-                checkData.current.context = `Código do relato: ${params.userInput}. `;
+            path: async (params: any) => {
+                const reportId = params.userInput?.trim();
+                checkData.current.context = `Código do relato: ${reportId}. `;
+
+                if (reportId) {
+                    try {
+                        const report = await fetchReportById(reportId);
+                        const summary = summarizeReport(report);
+                        checkData.current.context += `Dados do relato: ${summary} `;
+                        // Exibe o resumo diretamente no chat para o usuário
+                        await params.injectMessage(formatMessageText(`Resumo do relato:\n${summary}`));
+                    } catch (error) {
+                        console.error("Erro ao consultar relato:", error);
+                        checkData.current.context += `Dados do relato: (erro ao consultar). `;
+                        await params.injectMessage("Erro ao consultar o relato. Por favor, tente novamente mais tarde.");
+                    }
+                }
+
                 return "result_step";
             },
         },
