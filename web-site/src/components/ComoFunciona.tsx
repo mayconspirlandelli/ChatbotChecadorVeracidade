@@ -28,12 +28,12 @@ export default function ComoFunciona() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
           {steps.map((step, i) => (
             <div key={step.title} className="flex flex-col items-center text-center">
-              <div className="w-24 h-24 rounded-full bg-turquesa/10 flex items-center justify-center mb-6">
-                <step.icon className="w-10 h-10 text-turquesa" />
+              <div className="w-28 h-28 rounded-full bg-turquesa/10 flex items-center justify-center mb-6">
+                <step.icon className="w-12 h-12 text-turquesa" />
               </div>
-              <div className="text-turquesa font-bold text-sm mb-2">Passo {i + 1}</div>
-              <h3 className="text-cinza-escuro font-bold text-lg mb-3">{step.title}</h3>
-              <p className="text-cinza-medio text-sm leading-relaxed max-w-xs">
+              <div className="text-turquesa font-bold text-sm mb-3">Passo {i + 1}</div>
+              <h3 className="text-cinza-escuro font-bold text-lg mb-4">{step.title}</h3>
+              <p className="text-cinza-medio text-sm leading-relaxed max-w-sm">
                 {step.description}
               </p>
             </div>

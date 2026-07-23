@@ -6,11 +6,11 @@ const stats = [
 
 export default function Stats() {
   return (
-    <section className="bg-white py-16 lg:py-20">
-      <div className="max-w-[1200px] mx-auto px-5 lg:px-10 grid grid-cols-1 md:grid-cols-3 gap-8">
+    <section className="bg-white py-20 lg:py-28">
+      <div className="max-w-[1200px] mx-auto px-5 lg:px-10 grid grid-cols-1 md:grid-cols-3 gap-10">
         {stats.map((stat) => (
-          <div key={stat.label} className="text-center p-8 rounded-lg bg-cinza-claro">
-            <div className="text-laranja text-[48px] font-bold leading-none mb-3">
+          <div key={stat.label} className="text-center p-10 rounded-lg bg-cinza-claro">
+            <div className="text-laranja text-[48px] font-bold leading-none mb-4">
               {stat.number}
             </div>
             <div className="text-cinza-medio text-sm">

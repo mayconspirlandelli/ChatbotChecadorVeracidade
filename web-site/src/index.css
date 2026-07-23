@@ -4,6 +4,10 @@
   --color-laranja: #FF6B35;
   --color-laranja-dark: #e55a2b;
   --color-turquesa: #29B6B0;
+  --color-fundo-hero: #FDFDFD;
+  --color-fonte-titulo: #4B5563;
+  --color-fundo-botao: #5CDFD2;
+  --color-cor-botao: #30B8BF;
   --color-turquesa-dark: #229e99;
   --color-cinza-escuro: #3D3D3D;
   --color-cinza-footer: #2D2D2D;
@@ -16,8 +20,8 @@
 }
 
 * {
-  margin: 0;
-  padding: 0;
+  margin: auto;
+  padding: auto;
   box-sizing: border-box;
 }
 

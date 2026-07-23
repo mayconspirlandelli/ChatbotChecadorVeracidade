@@ -6,7 +6,7 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 bg-white shadow-sm">
-      <div className="max-w-[1400px] mx-auto px-5 lg:px-24 flex items-center justify-between h-16">
+      <div className="max-w-[1400px] mx-auto px-5 lg:px-10 flex items-center justify-between h-16">
         <div className="flex items-center gap-2">
           <span className="text-laranja font-bold text-2xl">d</span>
           <span className="font-bold text-cinza-escuro text-lg">Aurora</span>
